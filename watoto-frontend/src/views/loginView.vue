@@ -93,21 +93,21 @@ const handleLogin = async () => {
 
   isLoading.value = true
   try {
-    const res = await login(email.value, password.value)
+    const response = await login(email.value, password.value)
 
-    if (res && res.data && res.data.token) {
-      localStorage.setItem('token', res.data.token)
-      localStorage.setItem('user', JSON.stringify(res.data.user))
-
-      message.value = 'Login successful! Redirecting...'
+    if (response.token) {
+      localStorage.setItem('token', response.token)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+      message.value = 'Login successful!'
       messageType.value = 'success'
-      setTimeout(() => router.push('/dashboard'), 1000)
-    } else {
-      throw new Error('Invalid response from server')
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        router.push('/')
+      }, 1000)
     }
-  } catch (err) {
-    console.error('Login error:', err)
-    message.value = err.response?.data?.message || 'Login failed. Please check your credentials.'
+  } catch (error) {
+    message.value = error.message || 'Login failed. Please try again.'
     messageType.value = 'error'
   } finally {
     isLoading.value = false
@@ -126,100 +126,94 @@ onMounted(() => {
 
 <style scoped>
 .auth-container {
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: var(--lightBrown);
-  padding: 2rem;
+  background-color: var(--lightBrown);
+  padding: 20px;
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
+  background-color: var(--white);
+  padding: 40px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 2.5rem;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .title {
-  font-size: 2rem;
+  text-align: center;
   color: var(--darkBrown);
-  margin-bottom: 0.5rem;
+  margin-bottom: 10px;
 }
 
 .subtitle {
-  color: var(--midBrown);
-  margin-bottom: 2rem;
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.form {
+  margin-bottom: 20px;
 }
 
 .input-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 }
 
 label {
   display: block;
+  margin-bottom: 8px;
   color: var(--darkBrown);
-  margin-bottom: 0.5rem;
   font-weight: 500;
 }
 
 input {
   width: 100%;
-  padding: 0.875rem;
-  border: 1px solid var(--midBrown);
+  padding: 12px;
+  border: 1px solid var(--midbrown);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.8);
-  transition: all 0.3s ease;
-}
-
-input:focus {
-  outline: none;
-  border-color: var(--darkBrown);
-  box-shadow: 0 0 0 3px rgba(107, 79, 74, 0.1);
+  background-color: var(--lightestBrown);
+  font-size: 1rem;
 }
 
 .hint {
-  font-size: 0.875rem;
-  color: #e53e3e;
-  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #d9534f;
+  margin-top: 4px;
 }
 
 .auth-btn {
   width: 100%;
-  padding: 1rem;
-  background: var(--darkBrown);
+  padding: 14px;
+  background-color: var(--midbrown);
   color: white;
   border: none;
   border-radius: 8px;
-  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 1rem;
+  transition: background-color 0.3s;
 }
 
-.auth-btn:hover:not(:disabled) {
-  background: #000000;
-  transform: translateY(-1px);
+.auth-btn:hover {
+  background-color: #c9302c;
 }
 
 .auth-btn:disabled {
-  opacity: 0.7;
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
 .extra-links {
-  margin-top: 1.5rem;
   text-align: center;
+  margin-top: 20px;
 }
 
 .extra-links a {
-  color: var(--midBrown);
+  color: var(--midbrown);
   text-decoration: none;
-  font-weight: 500;
 }
 
 .extra-links a:hover {
@@ -227,12 +221,22 @@ input:focus {
 }
 
 .success-message {
-  color: #38a169;
-  margin-top: 1rem;
+  color: #28a745;
+  text-align: center;
+  margin-top: 10px;
 }
 
 .error-message {
-  color: #e53e3e;
-  margin-top: 1rem;
+  color: #d9534f;
+  text-align: center;
+  margin-top: 10px;
+}
+
+:root {
+  --darkBrown: #8c5c38;
+  --lightBrown: #e5d4c0;
+  --midbrown: #a47148;
+  --lightestBrown: #fefaf0;
+  --white: #ffffff;
 }
 </style>

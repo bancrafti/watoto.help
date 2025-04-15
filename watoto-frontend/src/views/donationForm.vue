@@ -17,6 +17,8 @@
         v-model="form.name"
         placeholder="Enter your full name"
         required
+        readonly
+        :class="{ 'readonly-input': true }"
       />
 
       <label for="phone">Phone Number</label>
@@ -107,13 +109,13 @@
 </template>
 
 <script setup>
-import { reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
+import { API_BASE_URL } from '@/config/api'
 
 const router = useRouter()
-
-const form = reactive({
+const form = ref({
   type: '',
   name: '',
   phone: '',
@@ -123,41 +125,64 @@ const form = reactive({
   servicesType: '',
   paymentMethod: '',
   purpose: '',
-  preferences: ''
+  preferences: '',
+  date: new Date().toISOString()
 })
 
-// Fetch user data from backend when component mounts
 onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/user')
-    // Pre-fill the name field with user's name from backend
-    form.name = response.data.name
-  } catch (err) {
-    console.error('Error fetching user data:', err)
+    const token = localStorage.getItem('token')
+    if (!token) {
+      router.push('/login')
+      return
+    }
+
+    const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (response.data.data.user) {
+      form.value.name = response.data.data.user.name
+    }
+  } catch (error) {
+    console.error('Failed to fetch user data:', error)
+    if (error.response?.status === 401) {
+      router.push('/login')
+    }
   }
 })
 
-function formatPhoneNumber() {
-  form.phone = form.phone.replace(/\D/g, '').substring(0, 9)
+const formatPhoneNumber = (event) => {
+  let value = event.target.value.replace(/\D/g, '')
+  if (value.length > 9) value = value.slice(0, 9)
+  form.value.phone = value
 }
 
-function getInternationalPhone() {
-  return form.phone ? '+254' + form.phone : ''
-}
-
-async function submitForm() {
+const submitForm = async () => {
   try {
-    const submission = { ...form }
-    submission.phone = getInternationalPhone()
-    await axios.post('http://localhost:5000/api/donations', submission)
+    const token = localStorage.getItem('token')
+    if (!token) {
+      router.push('/login')
+      return
+    }
 
-    // Store user's name in local storage to access it on thank you page
-    localStorage.setItem('donorName', form.name)
+    const response = await axios.post(`${API_BASE_URL}/donations`, form.value, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
-    // Use replace to prevent back navigation
-    router.replace('/thank-you')
-  } catch (err) {
-    console.error('Submission error:', err)
+    if (response.data.status === 'success') {
+      localStorage.setItem('donationName', form.value.name)
+      router.push('/thank-you')
+    }
+  } catch (error) {
+    console.error('Failed to submit donation:', error)
+    if (error.response?.status === 401) {
+      router.push('/login')
+    }
   }
 }
 </script>
@@ -230,5 +255,10 @@ button:hover {
   --midbrown: #a47148;
   --lightestBrown: #fefaf0;
   --white: #ffffff;
+}
+
+.readonly-input {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
 }
 </style>
