@@ -137,67 +137,11 @@ const form = ref({
   date: new Date().toISOString()
 })
 
-// Validation function
-const validateForm = () => {
-  // Check required fields
-  if (!form.value.type) {
-    message.value = 'Please select if you are an Individual or Company'
-    messageClass.value = 'alert-danger'
-    return false
-  }
-  
-  if (!form.value.name) {
-    message.value = 'Please enter your name'
-    messageClass.value = 'alert-danger'
-    return false
-  }
-  
-  if (!form.value.phone) {
-    message.value = 'Please enter your phone number'
-    messageClass.value = 'alert-danger'
-    return false
-  }
-  
-  // Validate phone number format - must start with 7 and be 9 digits
-  if (!/^7\d{8}$/.test(form.value.phone)) {
-    message.value = 'Phone number must start with 7 and be 9 digits long'
-    messageClass.value = 'alert-danger'
-    return false
-  }
-  
-  if (!form.value.donationType) {
-    message.value = 'Please select a donation type'
-    messageClass.value = 'alert-danger'
-    return false
-  }
-
-  // Validate donation type specific fields
-  if (form.value.donationType === 'goods' && !form.value.goodsType) {
-    message.value = 'Please select the type of goods'
-    messageClass.value = 'alert-danger'
-    return false
-  }
-
-  if (form.value.donationType === 'services' && !form.value.servicesType) {
-    message.value = 'Please select the type of service'
-    messageClass.value = 'alert-danger'
-    return false
-  }
-
-  if (form.value.donationType === 'money' && !form.value.paymentMethod) {
-    message.value = 'Please select a payment method'
-    messageClass.value = 'alert-danger'
-    return false
-  }
-  
-  return true
-}
-
 onMounted(async () => {
   try {
     const token = localStorage.getItem('token')
     if (!token) {
-      router.push('/login')
+      console.error('No token found')
       return
     }
 
@@ -207,13 +151,18 @@ onMounted(async () => {
       }
     })
 
-    if (response.data.data.user) {
+    if (response.data.status === 'success' && response.data.data.user) {
       userName.value = response.data.data.user.name
-      form.value.name = response.data.data.user.name
+      form.value.name = response.data.data.user.name // Set the name immediately
+      console.log('User data fetched successfully:', response.data.data.user)
+    } else {
+      console.error('Invalid response format:', response.data)
     }
   } catch (error) {
-    console.error('Failed to fetch user data:', error)
+    console.error('Error fetching user data:', error)
     if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('token')
       router.push('/login')
     }
   }
@@ -245,41 +194,46 @@ const submitForm = async () => {
       return
     }
 
-    // Validate form before submission
-    if (!validateForm()) {
+    // Validate required fields
+    if (!form.value.type || !form.value.name || !form.value.phone || !form.value.donationType || !form.value.purpose) {
+      message.value = 'Please fill in all required fields'
+      messageClass.value = 'alert-danger'
       return
+    }
+
+    // Prepare the donation data
+    const donationData = {
+      type: form.value.type,
+      name: form.value.name,
+      phone: form.value.phone,
+      location: form.value.location || '',
+      donationType: form.value.donationType,
+      purpose: form.value.purpose,
+      date: new Date().toISOString()
+    }
+
+    // Add type-specific fields only when they have values
+    if (form.value.donationType === 'goods' && form.value.goodsType) {
+      donationData.goodsType = form.value.goodsType
+    }
+    if (form.value.donationType === 'services' && form.value.servicesType) {
+      donationData.servicesType = form.value.servicesType
+    }
+    if (form.value.donationType === 'money' && form.value.paymentMethod) {
+      donationData.paymentMethod = form.value.paymentMethod
+    }
+
+    // Add preferences if selected
+    if (form.value.preferences) {
+      donationData.preferences = form.value.preferences
     }
 
     message.value = 'Submitting donation...'
     messageClass.value = 'alert-info'
 
-    // Format phone number to ensure it complies with backend requirements
-    const formattedData = {
-      type: form.value.type,
-      name: form.value.name,
-      phone: form.value.phone,
-      location: form.value.location,
-      donationType: form.value.donationType,
-      purpose: form.value.purpose,
-      preferences: form.value.preferences,
-      date: form.value.date
-    }
+    console.log('Submitting donation data:', donationData)
 
-    // Only include fields based on donation type
-    if (form.value.donationType === 'goods') {
-      formattedData.goodsType = form.value.goodsType
-    } else if (form.value.donationType === 'services') {
-      formattedData.servicesType = form.value.servicesType
-    } else if (form.value.donationType === 'money') {
-      formattedData.paymentMethod = form.value.paymentMethod
-    }
-
-    // Make sure phone number is properly formatted
-    if (formattedData.phone && !formattedData.phone.startsWith('7')) {
-      formattedData.phone = formattedData.phone.replace(/^0/, '7')
-    }
-
-    const response = await axios.post(`${API_BASE_URL}/donations`, formattedData, {
+    const response = await axios.post(`${API_BASE_URL}/donations`, donationData, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -289,10 +243,10 @@ const submitForm = async () => {
     if (response.data.status === 'success') {
       message.value = 'Donation submitted successfully!'
       messageClass.value = 'alert-success'
-      
+
       // Store the donor name for the thank you page
       localStorage.setItem('donationName', form.value.name)
-      
+
       // Clear the form data
       form.value = {
         type: '',
@@ -315,18 +269,7 @@ const submitForm = async () => {
     }
   } catch (error) {
     console.error('Failed to submit donation:', error)
-    
-    // Try to extract more specific error information
-    if (error.response?.data?.errors) {
-      // If the API returns specific error fields
-      const errorMessages = Object.values(error.response.data.errors).flat()
-      message.value = errorMessages.join(', ')
-    } else if (error.response?.data?.message) {
-      message.value = error.response.data.message
-    } else {
-      message.value = 'Failed to submit donation. Please try again.'
-    }
-    
+    message.value = error.response?.data?.message || 'Failed to submit donation. Please try again.'
     messageClass.value = 'alert-danger'
 
     if (error.response?.status === 401) {
@@ -385,7 +328,7 @@ textarea {
 button {
   margin-top: 30px;
   width: 100%;
-  background-color: var(--midbrown);
+  background-color: var(--lightBrown);
   color: white;
   padding: 14px;
   font-size: 1rem;

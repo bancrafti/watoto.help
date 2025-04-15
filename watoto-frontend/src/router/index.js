@@ -7,6 +7,10 @@ import DonationForm from '@/views/donationForm.vue'
 import AdminPanel from '@/views/AdminPanel.vue'
 import ThankYou from '@/views/ThankYou.vue'
 import ForgotPassword from '@/views/ForgotPassword.vue'
+import MullyChildrensHome from '@/views/MullyChildrensHome.vue'
+import SOSChildrensHome from '@/views/SOSChildrensHome.vue'
+import MograRescueCenter from '@/views/MograRescueCenter.vue'
+import HappyLifeChildrensHome from '@/views/HappyLifeChildrensHome.vue'
 
 const routes = [
   {
@@ -58,6 +62,26 @@ const routes = [
     path: '/thank-you',
     name: 'ThankYou',
     component: ThankYou
+  },
+  {
+    path: '/mully-childrens-home',
+    name: 'MullyChildrensHome',
+    component: MullyChildrensHome
+  },
+  {
+    path: '/sos-childrens-home',
+    name: 'SOSChildrensHome',
+    component: SOSChildrensHome
+  },
+  {
+    path: '/mogra-rescue-center',
+    name: 'MograRescueCenter',
+    component: MograRescueCenter
+  },
+  {
+    path: '/happy-life-childrens-home',
+    name: 'HappyLifeChildrensHome',
+    component: HappyLifeChildrensHome
   }
 ]
 

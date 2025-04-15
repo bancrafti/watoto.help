@@ -1,15 +1,10 @@
 const mongoose = require('mongoose');
 
 const donationSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   type: {
     type: String,
-    enum: ['individual', 'company'],
-    required: [true, 'Please specify if you are an individual or company']
+    required: [true, 'Please specify if you are an individual or company'],
+    enum: ['individual', 'company']
   },
   name: {
     type: String,
@@ -18,51 +13,54 @@ const donationSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: [true, 'Please provide your phone number'],
-    validate: {
-      validator: function(v) {
-        return /^7\d{8}$/.test(v);
-      },
-      message: 'Phone number must start with 7 and be 9 digits long'
-    }
+    match: [/^7\d{8}$/, 'Please provide a valid phone number starting with 7']
   },
   location: {
     type: String,
-    required: false
+    required: [true, 'Please provide your location']
   },
   donationType: {
     type: String,
-    enum: ['money', 'goods', 'services'],
-    required: [true, 'Please specify the type of donation']
+    required: [true, 'Please select a donation type'],
+    enum: ['money', 'goods', 'services']
   },
   goodsType: {
     type: String,
     enum: ['food', 'clothing', 'school', 'toiletries'],
-    required: function() {
-      return this.donationType === 'goods';
+    validate: {
+      validator: function(v) {
+        return this.donationType !== 'goods' || (this.donationType === 'goods' && v);
+      },
+      message: 'Goods type is required when donation type is goods'
     }
   },
   servicesType: {
     type: String,
     enum: ['medical', 'teaching', 'counselling', 'it', 'maintenance'],
-    required: function() {
-      return this.donationType === 'services';
+    validate: {
+      validator: function(v) {
+        return this.donationType !== 'services' || (this.donationType === 'services' && v);
+      },
+      message: 'Services type is required when donation type is services'
     }
   },
   paymentMethod: {
     type: String,
     enum: ['mpesa', 'bank', 'paypal'],
-    required: function() {
-      return this.donationType === 'money';
+    validate: {
+      validator: function(v) {
+        return this.donationType !== 'money' || (this.donationType === 'money' && v);
+      },
+      message: 'Payment method is required when donation type is money'
     }
   },
   purpose: {
     type: String,
-    required: false
+    required: [true, 'Please provide the purpose of your donation']
   },
   preferences: {
     type: String,
-    enum: ['receipt', 'updates', 'anonymous', 'future'],
-    required: false
+    enum: ['receipt', 'updates', 'anonymous', 'future']
   },
   date: {
     type: Date,

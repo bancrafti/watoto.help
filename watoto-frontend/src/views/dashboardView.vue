@@ -35,29 +35,29 @@ const homes = [
     title: "Mully Children's Home",
     description:
       "Located in Machakos, Mully offers shelter, education, and love to over 150 orphaned children.",
-    image: "images/MCH.jpg",
-    link: "/mully",
+    image: "/images/mully.jpeg",
+    link: "/mully-childrens-home",
   },
   {
     title: "SOS Children's Village Nairobi",
     description:
-      "One of Kenya’s most renowned homes, SOS supports vulnerable children with family-based care and stability.",
-    image: "images/SOS.webp",
-    link: "/sos",
+      "One of Kenya's most renowned homes, SOS supports vulnerable children with family-based care and stability.",
+    image: "/images/sos.jpeg",
+    link: "/sos-childrens-home",
   },
   {
     title: "Mogra Rescue Centre",
     description:
       "Based in Nairobi, Mogra is a safe haven for street children and abandoned babies, offering full-time care.",
-    image: "images/Mogra2.jpeg",
-    link: "/mogra",
+    image: "/images/mogra.jpeg",
+    link: "/mogra-rescue-center",
   },
   {
     title: "Happy Life Children's Home",
     description:
       "Located in Juja, Happy Life provides education, meals, and medical services to abandoned children.",
-    image: "images/Happy-Kids.jpg",
-    link: "/happy",
+    image: "/images/happylife.jpeg",
+    link: "/happy-life-childrens-home",
   },
 ];
 </script>
@@ -67,7 +67,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', sans-serif;
-  background-color: var(--lightBrown); /* Light brown background for entire page */
+  background-color: white; /* Light brown background for entire page */
   color: var(--midbrown);
 }
 
@@ -195,5 +195,6 @@ body {
   --darkBrown: #8c5c38;
   --lightBrown: #e5d4c0;
   --midbrown: #a47148;
+  --white:#fff;
 }
 </style>

@@ -53,11 +53,14 @@ const donations = ref([])
 const isLoading = ref(true)
 const error = ref('')
 
-onMounted(async () => {
+const fetchDonations = async () => {
   try {
     const token = localStorage.getItem('token')
-    if (!token) {
-      router.push('/login')
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+    if (!token || user.role !== 'admin') {
+      console.error('Unauthorized access')
+      router.push('/')
       return
     }
 
@@ -69,17 +72,28 @@ onMounted(async () => {
 
     if (response.data.status === 'success') {
       donations.value = response.data.data.donations
+      console.log('Donations fetched successfully:', donations.value)
+    } else {
+      console.error('Invalid response format:', response.data)
     }
   } catch (error) {
-    console.error('Failed to fetch donations:', error)
+    console.error('Error fetching donations:', error)
     if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
       router.push('/login')
-    } else {
-      error.value = 'Failed to load donations. Please try again later.'
+    } else if (error.response?.status === 403) {
+      // Not authorized
+      router.push('/')
     }
   } finally {
     isLoading.value = false
   }
+}
+
+onMounted(async () => {
+  await fetchDonations()
 })
 
 function formatDate(dateStr) {

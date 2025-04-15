@@ -76,14 +76,13 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.getMe = async (req, res) => {
+exports.getMe = async (req, res, next) => {
   try {
+    console.log('Getting user data for:', req.user._id);
     const user = await User.findById(req.user._id).select('-password');
+    
     if (!user) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'User not found'
-      });
+      return next(new AppError('User not found', 404));
     }
 
     res.status(200).json({
@@ -93,9 +92,7 @@ exports.getMe = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error fetching user data'
-    });
+    console.error('Error in getMe:', error);
+    next(error);
   }
 }; 

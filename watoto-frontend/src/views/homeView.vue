@@ -11,7 +11,7 @@
       <div class="text">
         <h2>Helping Little Hearts Thrive</h2>
         <p>
-          Watoto is a compassionate platform dedicated to connecting generous donors with children’s homes across Kenya.
+          Watoto is a compassionate platform dedicated to connecting generous donors with children's homes across Kenya.
           Whether you're donating clothes, books, or love, every bit counts.
         </p>
         <router-link to="/login" class="cta-button">Get Started</router-link>
@@ -61,7 +61,7 @@
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background-image: url('/images/image1.jpg');
+  background-image: url('/images/homeView.jpeg');
   background-size: cover;
   background-position: center;
   border: 8px solid #e5d4c0;
