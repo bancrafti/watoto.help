@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const donationSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   type: {
     type: String,
     enum: ['individual', 'company'],
@@ -12,7 +17,13 @@ const donationSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: [true, 'Please provide your phone number']
+    required: [true, 'Please provide your phone number'],
+    validate: {
+      validator: function(v) {
+        return /^7\d{8}$/.test(v);
+      },
+      message: 'Phone number must start with 7 and be 9 digits long'
+    }
   },
   location: {
     type: String,
@@ -46,7 +57,7 @@ const donationSchema = new mongoose.Schema({
   },
   purpose: {
     type: String,
-    required: [true, 'Please provide the purpose of your donation']
+    required: false
   },
   preferences: {
     type: String,
@@ -59,6 +70,4 @@ const donationSchema = new mongoose.Schema({
   }
 });
 
-const Donation = mongoose.model('Donation', donationSchema);
-
-module.exports = Donation; 
+module.exports = mongoose.model('Donation', donationSchema); 

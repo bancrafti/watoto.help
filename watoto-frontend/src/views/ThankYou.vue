@@ -8,6 +8,7 @@
       <p>Your donation has been successfully submitted. We truly appreciate your generosity and support.</p>
       <p>A confirmation has been sent to your contact information.</p>
       <div class="button-container">
+        <router-link to="/dashboard" class="dashboard-button">Go to Dashboard</router-link>
         <router-link to="/" class="home-button">Return to Homepage</router-link>
       </div>
     </div>
@@ -21,7 +22,7 @@ const donorName = ref('')
 
 onMounted(() => {
   // Get the donor name from localStorage
-  donorName.value = localStorage.getItem('donorName') || 'Generous Donor'
+  donorName.value = localStorage.getItem('donationName') || 'Generous Donor'
 
   // Prevent going back to the form
   window.history.pushState(null, null, window.location.pathname)
@@ -99,21 +100,25 @@ p {
 }
 
 .button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   margin-top: 30px;
 }
 
+.dashboard-button,
 .home-button {
+  display: inline-block;
+  padding: 12px 24px;
   background-color: var(--midbrown);
   color: white;
-  padding: 14px 30px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
   text-decoration: none;
-  display: inline-block;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s;
 }
 
+.dashboard-button:hover,
 .home-button:hover {
   background-color: #c9302c;
 }
