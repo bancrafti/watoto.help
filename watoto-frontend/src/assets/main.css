@@ -1,0 +1,9 @@
+:root {
+  --darkBrown:#a47148;
+  --lightBrown:#e5d4c0;
+  --midbrown:#8c5c38;
+
+}
+body{
+  background-color: var(--lightBrown);
+}
